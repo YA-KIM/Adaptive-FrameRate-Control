@@ -1,4 +1,4 @@
-****************Adaptive Frame-Rate Control for MOT with DQN****************  
+### ****************Adaptive Frame-Rate Control for MOT with DQN****************  
 
 **핵심 아이디어**
 
@@ -13,7 +13,8 @@
 - 추적 난이도가 낮은 구간(정적/완만 이동)에서는 FPS를 낮춰 연산·전력 절감, 난이도가 높은 구간(급가속/회전/군중)에서는 FPS를 높여 정확도 유지.
 
 - 기존 MOT 파이프라인(Detector/Tracker)을 바꾸지 않고, 샘플링 정책만 최적화하는 경량·실용적 접근.
-  
+
+---
 
 **1) 시스템 개요**
 
@@ -31,7 +32,8 @@ State: 최근 history_length 프레임의 시계열 스택(총 9차원/프레임
 
 Action: Frame_Rates = {5, 10, 15, 30} 중 하나 선택
 
-  
+---
+
 **2) 저장소 구조**
 
     Adaptive-FrameRate-Control/
@@ -62,7 +64,8 @@ Action: Frame_Rates = {5, 10, 15, 30} 중 하나 선택
 
 
 
-  
+---
+
 **3) 데이터셋**
 
 MOT17 (예시 경로)
@@ -72,6 +75,7 @@ MOT17 (예시 경로)
 
 Tester_MOT7_ds.py / Trainer_MOT7_ds.py의 dataset_path와 Options(source=...)를 환경에 맞게 수정.  
 
+---
 
 **4) 실행 방법**
 
@@ -115,6 +119,7 @@ python trainer_mot7_sort.py
 SORT를 단일 객체 시나리오로 통제해 모듈 인터페이스를 확장/검증하는 실험용 스크립트(구현 진행 중)
 
 
+---
   
 
 **5) 네트워크 상세**
@@ -161,6 +166,7 @@ DQN: ≈ 106.9K
 총 ≈ 115K (경량, 실시간 적합)
 
   
+---
 
 
 **6) 보상(Reward) 설계**
