@@ -34,31 +34,31 @@ Action: Frame_Rates = {5, 10, 15, 30} 중 하나 선택
   
 **2) 저장소 구조**
 
-Adaptive-FrameRate-Control/
-
-├─ Tester_MOT7_ds.py           # ✅ TEST (MOT 다중 객체, DeepSORT 확장 인터페이스)
-
-├─ Trainer_MOT7_ds.py          # ✅ TRAIN (MOT 다중 객체)
-
-├─ tester_mot7_sort.py         # 🚧 TEST (단일 객체) — 확장/연구용
-
-├─ trainer_mot7_sort.py        # 🚧 TRAIN (단일 객체) — 확장/연구용
-
-├─ utility/
-
-│  ├─ agent_MOT.py             # DQN Agent (policy/feature/target, 메모리, 보상 등)
-
-│  ├─ model.py                 # FeatureExtractor(1D-CNN), DQN 정의
-
-│  ├─ moment.py                # Moment/History_Supervisor (트랙 히스토리 관리)
-
-│  ├─ tools.py, config.py, ... # 보조 유틸
-
-└─ yolov7_object_tracking/
-
-     ├─ utils/                   # YOLOv7 유틸(letterbox 등)
-   
-     └─ runs/                    # 결과물 저장(root)
+    Adaptive-FrameRate-Control/
+    
+    ├─ Tester_MOT7_ds.py           # ✅ TEST (MOT 다중 객체, DeepSORT 확장 인터페이스)
+    
+    ├─ Trainer_MOT7_ds.py          # ✅ TRAIN (MOT 다중 객체)
+    
+    ├─ tester_mot7_sort.py         # 🚧 TEST (단일 객체) — 확장/연구용
+    
+    ├─ trainer_mot7_sort.py        # 🚧 TRAIN (단일 객체) — 확장/연구용
+    
+    ├─ utility/
+    
+    │  ├─ agent_MOT.py             # DQN Agent (policy/feature/target, 메모리, 보상 등)
+    
+    │  ├─ model.py                 # FeatureExtractor(1D-CNN), DQN 정의
+    
+    │  ├─ moment.py                # Moment/History_Supervisor (트랙 히스토리 관리)
+    
+    │  ├─ tools.py, config.py, ... # 보조 유틸
+    
+    └─ yolov7_object_tracking/
+    
+      ├─ utils/                   # YOLOv7 유틸(letterbox 등)
+       
+      └─ runs/                    # 결과물 저장(root)
 
 
 
@@ -85,11 +85,11 @@ python Tester_MOT7_ds.py
 
 출력
 
-yolov7_object_tracking/runs/MOT/<seq>/<start_idx>/
-
- ├─ img1_<trk_idx>/*.jpg      # 시각화된 결과
-
- └─ <seq>.txt                 # 프레임별 로그(BBox, Vel/Acc, AngVel)
+    yolov7_object_tracking/runs/MOT/<seq>/<start_idx>/
+    
+     ├─ img1_<trk_idx>/*.jpg      # 시각화된 결과
+    
+     └─ <seq>.txt                 # 프레임별 로그(BBox, Vel/Acc, AngVel)
 
 
   
