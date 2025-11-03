@@ -14,18 +14,10 @@ Adaptive Frame-Rate Control for MOT with DQN
 기존 MOT 파이프라인(Detector/Tracker)을 바꾸지 않고, 샘플링 정책만 최적화하는 경량·실용적 접근.
 
 1) 시스템 개요
+<img width="1968" height="912" alt="image" src="https://github.com/user-attachments/assets/b21507ad-e3c7-4bb6-85dc-63354bc06592" />
 
-┌──────────┐   ┌──────────────┐   ┌──────────┐   ┌──────────────────────┐   ┌───────────────┐
+<img width="978" height="516" alt="image" src="https://github.com/user-attachments/assets/4b587fa9-fde9-4ba0-bd42-a3c154200af8" />
 
-│  Images  ├──►│  Detector    ├──►│ Tracker  ├──►│  State Builder        ├──►│  DQN Policy    │
-
-│ (MOT17)  │   │ (YOLOv7)     │   │ (SORT)   │   │  - [cx,cy,h,w] hist   │   │  - action=FPS │
-
-└──────────┘   └──────────────┘   └──────────┘   │  - [vx,vy,ax,ay,ω]   │   │  - {5,10,15,30}
-                                                 └──────────────────────┘   └───────────────┘
-                                                                                     │
-                                                                                 next frame
-                                                                               index stepping
 
 
 Detector: yolov7.pt(class 0: person)
