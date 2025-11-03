@@ -157,7 +157,9 @@ Linear(768→128) → ReLU → Dropout(0.2) → Linear(128→64) → ReLU → Dr
 
 출력: Q ∈ R^{B×4} (FPS 후보 4개에 대한 Q값)
 
-파라미터 수(참고)
+
+
+- 파라미터 수(참고)
 
 FeatureExtractor: ≈ 8.4K
 
