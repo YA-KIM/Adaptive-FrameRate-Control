@@ -1,5 +1,13 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
 runs/
-*/__pycache__/
-__pycache__
-weights/
-traced_model.pt
+outputs/
+checkpoints/
+logs/
+*.pt
+*.pth
+*.onnx
+*.mp4
+data/
+datasets/
