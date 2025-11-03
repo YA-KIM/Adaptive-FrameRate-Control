@@ -1,9 +1,11 @@
-****Adaptive Frame-Rate Control for MOT with DQN****
+**********Adaptive Frame-Rate Control for MOT with DQN****************
 
 **핵심 아이디어**
+
 연산·전력 예산을 아끼기 위해 프레임레이트(FPS)를 ‘행동(action)’으로 선택하는 DQN 기반 컨트롤러.
 이미지 → Detector(YOLOv7) → Tracker(SORT) → State(바운딩박스+운동량 시계열) → DQN이 최적 FPS(예: 5/10/15/30) 선택 → 다음 프레임을 건너뛰며 샘플링.
 
+  
 **왜 필요한가? (연구의 의의)**
 
 - 엣지 디바이스나 실시간 시스템에서, 고정 FPS는 낭비 혹은 정확도 저하를 유발.
@@ -11,6 +13,7 @@
 - 추적 난이도가 낮은 구간(정적/완만 이동)에서는 FPS를 낮춰 연산·전력 절감, 난이도가 높은 구간(급가속/회전/군중)에서는 FPS를 높여 정확도 유지.
 
 - 기존 MOT 파이프라인(Detector/Tracker)을 바꾸지 않고, 샘플링 정책만 최적화하는 경량·실용적 접근.
+  
 
 **1) 시스템 개요**
 
@@ -28,6 +31,7 @@ State: 최근 history_length 프레임의 시계열 스택(총 9차원/프레임
 
 Action: Frame_Rates = {5, 10, 15, 30} 중 하나 선택
 
+  
 **2) 저장소 구조**
 
 Adaptive-FrameRate-Control/
@@ -58,6 +62,7 @@ Adaptive-FrameRate-Control/
 
 
 
+  
 **3) 데이터셋**
 
 MOT17 (예시 경로)
@@ -65,7 +70,8 @@ MOT17 (예시 경로)
 /home/<user>/Datasets/FR_Dataset/MOT17/test/*FRCNN*/img1/*.jpg
 
 
-Tester_MOT7_ds.py / Trainer_MOT7_ds.py의 dataset_path와 Options(source=...)를 환경에 맞게 수정.
+Tester_MOT7_ds.py / Trainer_MOT7_ds.py의 dataset_path와 Options(source=...)를 환경에 맞게 수정.  
+
 
 **4) 실행 방법**
 
@@ -86,6 +92,7 @@ yolov7_object_tracking/runs/MOT/<seq>/<start_idx>/
  └─ <seq>.txt                 # 프레임별 로그(BBox, Vel/Acc, AngVel)
 
 
+  
 
 ✅ 학습 (MOT)
 python Trainer_MOT7_ds.py
@@ -108,6 +115,7 @@ python trainer_mot7_sort.py
 SORT를 단일 객체 시나리오로 통제해 모듈 인터페이스를 확장/검증하는 실험용 스크립트(구현 진행 중)
 
 
+  
 
 **5) 네트워크 상세**
 
@@ -122,6 +130,7 @@ SORT를 단일 객체 시나리오로 통제해 모듈 인터페이스를 확장
 BB ∈ R^{B×8×4}, M ∈ R^{B×8×5} → permute(0,2,1) → R^{B×4×8}, R^{B×5×8}
 
 
+  
 - FeatureExtractor (분기형 1D-CNN → concat)
 
 BBox branch: Conv1d(4→32) → ReLU → Conv1d(32→64) → ReLU → Flatten → 64×8=512
@@ -133,6 +142,7 @@ Motion branch: Conv1d(5→16) → ReLU → Conv1d(16→32) → ReLU → Flatten 
 
 권장 전처리: cx,cy,h,w는 이미지 크기로 정규화([0,1]), v/a/ω는 z-score 표준화.
 
+  
 
 - DQN (MLP Head)
 
@@ -150,6 +160,7 @@ DQN: ≈ 106.9K
 
 총 ≈ 115K (경량, 실시간 적합)
 
+  
 
 
 **6) 보상(Reward) 설계**
@@ -164,6 +175,7 @@ R_theta = -|θ_pred - θ_post|
 3. 에너지(낮은 FPS 선호):
 R_fr = prev_FR - expected_FR
 
+  
 종합 보상:
 
 R = w_iou*R_iou + w_theta*R_theta + w_FR*R_fr
