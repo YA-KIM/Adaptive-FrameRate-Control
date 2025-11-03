@@ -56,9 +56,9 @@ Adaptive-FrameRate-Control/
 
 └─ yolov7_object_tracking/
 
-   ├─ utils/                   # YOLOv7 유틸(letterbox 등)
+     ├─ utils/                   # YOLOv7 유틸(letterbox 등)
    
-   └─ runs/                    # 결과물 저장(root)
+     └─ runs/                    # 결과물 저장(root)
 
 
 
