@@ -17,17 +17,8 @@ from typing import List, Optional
 import gc
 import matplotlib.pyplot as plt
 from yolov7_object_tracking.utils.datasets import letterbox
-import psutil
-from collections import Counter
 import time
 import pandas as pd
-
-from deep_sort.deep_sort import nn_matching
-from deep_sort.deep_sort.tracker import Tracker
-from deep_sort.deep_sort.detection import Detection
-from deep_sort.tools.generate_detections import ImageEncoder
-from deep_sort.tools.generate_detections import create_box_encoder
-
 
 @dataclass
 class Options:
@@ -462,5 +453,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
