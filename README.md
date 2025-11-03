@@ -14,6 +14,7 @@ Adaptive Frame-Rate Control for MOT with DQN
 기존 MOT 파이프라인(Detector/Tracker)을 바꾸지 않고, 샘플링 정책만 최적화하는 경량·실용적 접근.
 
 1) 시스템 개요
+
 ┌──────────┐   ┌──────────────┐   ┌──────────┐   ┌──────────────────────┐   ┌───────────────┐
 
 │  Images  ├──►│  Detector    ├──►│ Tracker  ├──►│  State Builder        ├──►│  DQN Policy    │
