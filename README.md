@@ -1,4 +1,4 @@
-**********Adaptive Frame-Rate Control for MOT with DQN****************
+****************Adaptive Frame-Rate Control for MOT with DQN****************  
 
 **핵심 아이디어**
 
