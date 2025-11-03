@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+runs/
+outputs/
+checkpoints/
+logs/
+*.pt
+*.pth
+*.onnx
+*.mp4
+data/
+datasets/

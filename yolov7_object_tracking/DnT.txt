@@ -1,0 +1,55 @@
+############ 하이퍼파라미터 종류 ###################################
+(기본 설정) YOLO : conf_thres = 0.3, iou_thres = 0.2 / Sort : max_age=5, min_hits=1, iou_threshold=0.3
+1. max_IOU : DnT_with_IOU에서만 사용됨. 없어도 되는데 IOU가 가장 높은 객체 찾기 위해 최소 0.1은 넘도록 설정
+2. max_similarity : feature기반 매칭 수행하는 코드들에서 사용됨. 모든 프레임의 객체가 초기 추출된 feature 정보와 특징 유사도가 최소 0.9 넘도록 설정
+3. mmax_similarity : feature기반 매칭 수행하는 코드들에서 사용됨. prev_best_target이 존재하지 않는 프레임에서 새로 객체 매칭 시 유사도가 최소 0.92가 넘도록 설정 
+4. object_lifetime[track_id] >= 7 : track_id가 7프레임 이상 동일하면 해당 프레임 ROI에서의 featrue 정보를 initial_features에 업데이트해줌.. 
+
+
+######### best_target matching 방식 ##############################
+1. ROI와의 IOU 계산을 통한 best_target matching (+prev_best_target이 존재하지 않을 시, featrue 기반 rematching)
+2. 특징 계산을 통한 best_target matching
+3. IOU + feature 기반 best_target matching
+
+(1) 색상 정보의 사용 여부
+    (a) feature 정보와 분리 (색상 정보를 threshold 조건으로 둠)
+    (b) feature 정보와 결합 (가중치로 / 순위화)
+(2) threshold를 통한 best_target 추출 / 순위화를 통한 best_target 추출
+
+
+########### YOLO+SORT 수행 파일들 구성 ############################
+DnT_with_IOU : 1. 색상 정보 미사용.                                   
+- IOU O / featrue X / color X
+
+DnT_wo_color : 3. 색상 정보 미사용. threshold                       
+- IOU O / featrue O / color X / IOU를 threshold로
+
+DnT_by_frame : 3. 색상 정보 사용(a). threshold.                      
+- IOU O / featrue O / color O / IOU, color을 threshold로
+
+DnT_with_color_feature_combined : 3. 색상 정보 사용(b). threshold.   
+- IOU O / featrue O / color O / IOU, (featrue과 color을 결합한 값)을 threshold로
+
+DnT_ranking : 3. 색상 정보 사용(b). 순위화      
+- IOU O / featrue O / color O / featrue과 color를 순위화해 결합
+
+
+!! 각 파일들로 train/ test 돌릴 때, agent 파일 save_network, load_ 부분에 네트워크 이름 수정해서 돌리셈 +로그 파일 이름도 !!
+
+    def save_network(self):
+        os.makedirs(os.path.dirname(self.save_version_path), exist_ok=True)
+        print(f"Saving model to: {self.save_version_path + '_policy.pth'}")
+        print(f"Saving extractor to: {self.save_version_path + '_feature.pth'}") 
+        torch.save(self.policy_net.state_dict(), self.save_version_path + "_policy_color.pth")                       <- 여기
+        torch.save(self.feature_extractor.state_dict(), self.save_version_path + "_feature_color.pth")               <- 여기
+        print('Saved')
+
+    def load_network(self):
+        if not use_cuda:
+            return torch.load(self.load_version_path + "_policy_color.pth", map_location=torch.device('cpu'))         <- 여기
+        return torch.load(self.load_version_path + "_policy_color.pth")                                               <- 여기
+
+    def load_extractor(self):
+        if not use_cuda:
+            return torch.load(self.load_version_path + "_feature_color.pth", map_location=torch.device('cpu'))         <- 여기
+        return torch.load(self.load_version_path + "_feature_color.pth")                                               <- 여기
