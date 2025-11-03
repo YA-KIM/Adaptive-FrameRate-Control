@@ -1,19 +1,19 @@
-Adaptive Frame-Rate Control for MOT with DQN
+****Adaptive Frame-Rate Control for MOT with DQN****
 
-핵심 아이디어
+**핵심 아이디어**
 연산·전력 예산을 아끼기 위해 프레임레이트(FPS)를 ‘행동(action)’으로 선택하는 DQN 기반 컨트롤러.
 이미지 → Detector(YOLOv7) → Tracker(SORT) → State(바운딩박스+운동량 시계열) → DQN이 최적 FPS(예: 5/10/15/30) 선택 → 다음 프레임을 건너뛰며 샘플링.
 
-왜 필요한가? (연구의 의의)
+**왜 필요한가? (연구의 의의)**
 
-엣지 디바이스나 실시간 시스템에서, 고정 FPS는 낭비 혹은 정확도 저하를 유발.
+- 엣지 디바이스나 실시간 시스템에서, 고정 FPS는 낭비 혹은 정확도 저하를 유발.
 
-추적 난이도가 낮은 구간(정적/완만 이동)에서는 FPS를 낮춰 연산·전력 절감,
-난이도가 높은 구간(급가속/회전/군중)에서는 FPS를 높여 정확도 유지.
+- 추적 난이도가 낮은 구간(정적/완만 이동)에서는 FPS를 낮춰 연산·전력 절감, 난이도가 높은 구간(급가속/회전/군중)에서는 FPS를 높여 정확도 유지.
 
-기존 MOT 파이프라인(Detector/Tracker)을 바꾸지 않고, 샘플링 정책만 최적화하는 경량·실용적 접근.
+- 기존 MOT 파이프라인(Detector/Tracker)을 바꾸지 않고, 샘플링 정책만 최적화하는 경량·실용적 접근.
 
-1) 시스템 개요
+**1) 시스템 개요**
+
 <img width="1968" height="912" alt="image" src="https://github.com/user-attachments/assets/b21507ad-e3c7-4bb6-85dc-63354bc06592" />
 
 <img width="978" height="516" alt="image" src="https://github.com/user-attachments/assets/4b587fa9-fde9-4ba0-bd42-a3c154200af8" />
@@ -28,44 +28,37 @@ State: 최근 history_length 프레임의 시계열 스택(총 9차원/프레임
 
 Action: Frame_Rates = {5, 10, 15, 30} 중 하나 선택
 
-2) 저장소 구조
+**2) 저장소 구조**
+
 Adaptive-FrameRate-Control/
+
 ├─ Tester_MOT7_ds.py           # ✅ TEST (MOT 다중 객체, DeepSORT 확장 인터페이스)
+
 ├─ Trainer_MOT7_ds.py          # ✅ TRAIN (MOT 다중 객체)
+
 ├─ tester_mot7_sort.py         # 🚧 TEST (단일 객체) — 확장/연구용
+
 ├─ trainer_mot7_sort.py        # 🚧 TRAIN (단일 객체) — 확장/연구용
+
 ├─ utility/
+
 │  ├─ agent_MOT.py             # DQN Agent (policy/feature/target, 메모리, 보상 등)
+
 │  ├─ model.py                 # FeatureExtractor(1D-CNN), DQN 정의
+
 │  ├─ moment.py                # Moment/History_Supervisor (트랙 히스토리 관리)
+
 │  ├─ tools.py, config.py, ... # 보조 유틸
+
 └─ yolov7_object_tracking/
+
    ├─ utils/                   # YOLOv7 유틸(letterbox 등)
+   
    └─ runs/                    # 결과물 저장(root)
 
-3) 설치 & 환경
-Conda (권장)
-# (추천) 기본 채널 명시 & base 자동활성화 OFF (간헐적 중단/잡음 방지)
-conda config --add channels defaults
 
-# 새 환경
-conda create -n afr-mot python=3.10 -y
-conda activate afr-mot
 
-# 핵심 패키지
-pip install torch torchvision opencv-python numpy psutil
-
-가중치
-
-YOLOv7: yolov7.pt (경로 예: /home/<user>/yolov7.pt)
-
-DQN/FeatureExtractor 저장/로드:
-
-저장: models/<Version>_policy.pth, models/<Version>_feature.pth
-
-로드: Agent.Load_Ver로 버전 선택
-
-4) 데이터셋
+**3) 데이터셋**
 
 MOT17 (예시 경로)
 
@@ -74,7 +67,8 @@ MOT17 (예시 경로)
 
 Tester_MOT7_ds.py / Trainer_MOT7_ds.py의 dataset_path와 Options(source=...)를 환경에 맞게 수정.
 
-5) 실행 방법
+**4) 실행 방법**
+
 ✅ 테스트 (MOT, DeepSORT 확장 경로)
 python Tester_MOT7_ds.py
 
@@ -86,8 +80,12 @@ python Tester_MOT7_ds.py
 출력
 
 yolov7_object_tracking/runs/MOT/<seq>/<start_idx>/
+
  ├─ img1_<trk_idx>/*.jpg      # 시각화된 결과
+
  └─ <seq>.txt                 # 프레임별 로그(BBox, Vel/Acc, AngVel)
+
+
 
 ✅ 학습 (MOT)
 python Trainer_MOT7_ds.py
@@ -109,8 +107,11 @@ python trainer_mot7_sort.py
 
 SORT를 단일 객체 시나리오로 통제해 모듈 인터페이스를 확장/검증하는 실험용 스크립트(구현 진행 중)
 
-6) 네트워크 상세
-입력/상태
+
+
+**5) 네트워크 상세**
+
+- 입력/상태
 
 트랙별 시계열 윈도우 history_length = 8
 
@@ -120,7 +121,8 @@ SORT를 단일 객체 시나리오로 통제해 모듈 인터페이스를 확장
 텐서 모양(배치 B):
 BB ∈ R^{B×8×4}, M ∈ R^{B×8×5} → permute(0,2,1) → R^{B×4×8}, R^{B×5×8}
 
-FeatureExtractor (분기형 1D-CNN → concat)
+
+- FeatureExtractor (분기형 1D-CNN → concat)
 
 BBox branch: Conv1d(4→32) → ReLU → Conv1d(32→64) → ReLU → Flatten → 64×8=512
 
@@ -131,7 +133,8 @@ Motion branch: Conv1d(5→16) → ReLU → Conv1d(16→32) → ReLU → Flatten 
 
 권장 전처리: cx,cy,h,w는 이미지 크기로 정규화([0,1]), v/a/ω는 z-score 표준화.
 
-DQN (MLP Head)
+
+- DQN (MLP Head)
 
 입력: 768
 
@@ -147,15 +150,18 @@ DQN: ≈ 106.9K
 
 총 ≈ 115K (경량, 실시간 적합)
 
-7) 보상(Reward) 설계
 
-정확도(IoU): 현재 상태 moment에서 행동(FPS) expected_FR을 가정하여 다음 BBox를 외삽(BB_Predict) → 실제 다음 상태 post_moment와 IoU
+
+**6) 보상(Reward) 설계**
+
+
+1. 정확도(IoU): 현재 상태 moment에서 행동(FPS) expected_FR을 가정하여 다음 BBox를 외삽(BB_Predict) → 실제 다음 상태 post_moment와 IoU
 R_iou = IoU(predicted, post)
 
-선형성(궤적 일관성): ω(각속도) 기반 예측 각도와 실측 각도 차이
+2. 선형성(궤적 일관성): ω(각속도) 기반 예측 각도와 실측 각도 차이
 R_theta = -|θ_pred - θ_post|
 
-에너지(낮은 FPS 선호):
+3. 에너지(낮은 FPS 선호):
 R_fr = prev_FR - expected_FR
 
 종합 보상:
