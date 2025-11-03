@@ -15,8 +15,11 @@ Adaptive Frame-Rate Control for MOT with DQN
 
 1) 시스템 개요
 ┌──────────┐   ┌──────────────┐   ┌──────────┐   ┌──────────────────────┐   ┌───────────────┐
+
 │  Images  ├──►│  Detector    ├──►│ Tracker  ├──►│  State Builder        ├──►│  DQN Policy    │
+
 │ (MOT17)  │   │ (YOLOv7)     │   │ (SORT)   │   │  - [cx,cy,h,w] hist   │   │  - action=FPS │
+
 └──────────┘   └──────────────┘   └──────────┘   │  - [vx,vy,ax,ay,ω]   │   │  - {5,10,15,30}
                                                  └──────────────────────┘   └───────────────┘
                                                                                      │
