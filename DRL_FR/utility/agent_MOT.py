@@ -344,7 +344,7 @@ class Agent:
         return feature
 
 
-    def get_features(self, current_obj_id, state_history):
+    def get_features(self, current_obj_id, state_history, with_grad: bool = True):
         if state_history is None or len(state_history) == 0 or current_obj_id is None:
             return None
 
@@ -361,7 +361,14 @@ class Agent:
         m_tensor = torch.tensor(m_numpy.astype(np.float32), device=self.device).unsqueeze(0)
 
         self.feature_extractor.to(self.device)
-        feature = self.feature_extractor(bb_tensor, m_tensor)
+        
+        if with_grad:
+            feature = self.feature_extractor(bb_tensor, m_tensor)
+        else:
+            with torch.no_grad():
+                feature = self.feature_extractor(bb_tensor, m_tensor)
+
+        
         return feature
 
     # =========================
