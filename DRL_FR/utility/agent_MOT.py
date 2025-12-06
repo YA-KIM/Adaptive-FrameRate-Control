@@ -379,27 +379,58 @@ class Agent:
         if len(self.memory) < self.BATCH_SIZE:
             return
 
-        # 샘플링
+        # 1. 리플레이 버퍼에서 샘플링
         transitions = self.memory.sample(self.BATCH_SIZE)
         batch = Transition(*zip(*transitions))
+        # batch.state      : (B,) 리스트, 각 원소는 numpy (H, 9)
+        # batch.next_state : (B,) 리스트, 각 원소는 numpy (H, 9) or None
+        # batch.action     : (B,)
+        # batch.reward     : (B,)
 
-        # next_state 텐서 만들기
-        non_final_mask = torch.tensor(tuple(s is not None for s in batch.next_state), dtype=torch.bool, device=self.device)
-        next_states_list = [s for s in batch.next_state if s is not None]
-        if len(next_states_list) > 0:
-            non_final_next_states = Variable(torch.cat(next_states_list)).to(self.device)
+        raw_states      = batch.state        # tuple of np.ndarray (H, 9)
+        raw_next_states = batch.next_state   # tuple of np.ndarray (H, 9) or None
+        actions         = batch.action
+        rewards         = batch.reward
+
+        # 2) raw history → feature로 다시 추출
+        state_features = []
+        next_features  = []
+        non_final_mask_list = []
+
+        for s, ns in zip(raw_states, raw_next_states):
+            if s is None:
+                # 이 경우는 거의 없겠지만, 방어적으로 스킵
+                continue
+    
+            # current_obj_id는 get_features 내부에서 안 쓰니까
+            # 여기선 dummy 값 (예: 0) 써도 됨
+            feat_s = self.get_features(current_obj_id=0, state_history=s, with_grad=True)
+            state_features.append(feat_s)
+    
+            if ns is not None:
+                non_final_mask_list.append(True)
+                # target 쪽은 gradient 필요 없음
+                feat_ns = self.get_features(current_obj_id=0, state_history=ns, with_grad=False)
+                next_features.append(feat_ns)
+            else:
+                non_final_mask_list.append(False)
+
+        if len(state_features) == 0:
+            return
+
+        #(B,feature_dim)꼴로 합치기
+        state_batch = torch.cat(state_features, dim=0)  # 각 feature가 (1, D)이므로 dim=0으로 cat
+
+        if any(non_final_mask_list):
+            non_final_next_states = torch.cat(next_features, dim=0)  # (B_non_final, D)
         else:
             non_final_next_states = None
 
-        # state 텐서
-        valid_states = [s for s in batch.state if s is not None]
-        if len(valid_states) == 0:
-            return
-        state_batch = Variable(torch.cat(valid_states)).to(self.device)
+        non_final_mask = torch.tensor(non_final_mask_list, dtype=torch.bool, device=self.device)
 
-        # 액션/보상
-        action_batch = Variable(torch.LongTensor(batch.action).view(-1, 1)).to(self.device)
-        reward_batch = Variable(torch.FloatTensor(batch.reward).view(-1, 1)).to(self.device)
+        # 3. 유효한 액션 리워드 텐서
+        action_batch = torch.LongTensor(actions).view(-1, 1).to(self.device)
+        reward_batch = torch.FloatTensor(rewards).view(-1, 1).to(self.device)
 
         # 배치 패딩 (부족 시 0으로 채움)
         if state_batch.size(0) < self.BATCH_SIZE:
@@ -410,10 +441,10 @@ class Agent:
             action_batch = torch.cat([action_batch, action_pad], dim=0)
             reward_batch = torch.cat([reward_batch, reward_pad], dim=0)
 
-        # Q(s,a)
+        # 4. Q(s,a)
         state_action_values = self.policy_net(state_batch).gather(1, action_batch)
 
-        # target
+        # 5. target
         next_state_values = torch.zeros(self.BATCH_SIZE, 1, device=self.device)
         if non_final_next_states is not None:
             with torch.no_grad():
@@ -422,7 +453,7 @@ class Agent:
 
         expected = reward_batch + self.GAMMA * next_state_values
 
-        # 안정성 체크
+        # 6.Nan / Inf 방어; 안정성 체크
         if torch.isnan(state_action_values).any() or torch.isnan(expected).any():
             if verbose:
                 print("[Agent] NaN detected; skip step.")
@@ -432,6 +463,7 @@ class Agent:
                 print("[Agent] Inf detected; skip step.")
             return
 
+        # 7. 역전파
         loss = criterion(state_action_values, expected)
 
         if torch.isnan(loss) or torch.isinf(loss):
