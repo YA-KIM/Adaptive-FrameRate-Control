@@ -480,7 +480,10 @@ class SOT_with_DRL_Tr():
                                 Episode_History.update(track_id, temp, self.currentFr)
                                 current_moment = Episode_History[track_id][-1]
                                 inpu = Episode_History.get_state_history(track_id)
-                                state = self.Agent.get_features(track_id, inpu)
+
+                                with torch.no_gard():
+                                    state = self.Agent.get_features(track_id, inpu) #행동 선택시에는 그래디언트 저장 x
+                                
                                 index, predicted_fr = self.Agent.select_action(state)
 
                             self.prevFr = self.currentFr
@@ -600,9 +603,12 @@ class SOT_with_DRL_Tr():
                                 print(f"Reward: {reward}")
 
                                 next_input = Episode_History.get_state_history(track_id)
-                                next_state = self.Agent.get_features(track_id, next_input)
-                                if state is not None and index is not None and next_state is not None and reward is not None:
-                                    self.Agent.memory.push(state, index, next_state, reward)
+                                
+                                with torch.no_gard():
+                                    next_state = self.Agent.get_features(track_id, next_input)
+                                    
+                                if inpu is not None and index is not None and next_input is not None and reward is not None:
+                                    self.Agent.memory.push(inpu, index, next_input, reward)
 
                                 state = next_state
                                 prev_track_id = track_id
