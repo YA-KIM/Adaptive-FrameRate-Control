@@ -285,7 +285,7 @@ class Agent:
         if state is None:
             print("Warning: Computed state is None.")
             # 기본값을 반환하도록 처리
-            state = torch.zeros(1, 768)
+            state = torch.zeros(1, slef.history_length*96)
 
         # Exploration 
         if sample < eps_threshold:
