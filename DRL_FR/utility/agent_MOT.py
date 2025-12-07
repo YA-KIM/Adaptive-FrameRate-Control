@@ -30,12 +30,12 @@ class Agent:
 
     def __init__(
         self,
-        alpha: float = 0.2,
-        nu: float = 3.0,
-        threshold: float = 0.5,
+        alpha: float = 0.2, #
+        nu: float = 3.0, #
+        threshold: float = 0.5, # trigger(안 쓰이고 다른 알고리즘으로 대체)
         num_episodes: Optional[int] = None,
         load: bool = False,
-        n_actions: int = 4,
+        n_actions: int = 4, #[30, 15, 10, 5]
         device: Optional[torch.device] = None,
         version: str = "MOT_Ver7",
         load_version: str = "MOT_Ver5",
@@ -44,14 +44,14 @@ class Agent:
     ):
         # -------- 기본 하이퍼파라미터 -------
         self.n_actions = n_actions
-        self.history_length = 8
+        self.history_length = 8 #Markov에 최대한 가까워지기 위해 (ATari에서 stack4; 실험적으로 8근방에서 좋았다)
 
         self.Version = version
         self.Load_Ver = load_version
 
-        self.GAMMA = 0.900
-        self.EPS = 1.0
-        self.EPS_min = 0.01
+        self.GAMMA = 0.900 # 할인율(미래 가치)
+        self.EPS = 1.0 
+        self.EPS_min = 0.01 # E-greedy 정책 최소 
 
         # Reward 가중치 (음/양 모두 가능하도록 유지)
         self.w_iou = 2.0
@@ -78,7 +78,7 @@ class Agent:
 
         os.makedirs(self.save_path, exist_ok=True)
 
-        # -------- 네트워크 --------
+        # -------- 네트워크 할당 --------
         self.feature_extractor = FeatureExtractor()
         self.policy_net = DQN(self.history_length, self.n_actions)
 
@@ -88,7 +88,7 @@ class Agent:
             self.feature_extractor.eval()
 
         self.target_net = DQN(self.history_length, self.n_actions)
-        self.target_net.load_state_dict(self.policy_net.state_dict())
+        self.target_net.load_state_dict(self.policy_net.state_dict()) #target network 복제제
         self.target_net.eval()
 
         # 디바이스 이동
@@ -111,13 +111,14 @@ class Agent:
     # =========================
     # 저장/로드
     # =========================
+    
     def save_network(self) -> None:
         os.makedirs(os.path.dirname(self.save_version_path), exist_ok=True)
         torch.save(self.policy_net.state_dict(), self.save_version_path + "_policy.pth")
         torch.save(self.feature_extractor.state_dict(), self.save_version_path + "_feature.pth")
         print(f"[Agent] Saved -> {self.save_version_path}_policy.pth / _feature.pth")
 
-    def _safe_load(self, model: nn.Module, path: str) -> None:
+    def _safe_load(self, model: nn.Module, path: str) -> None: #안전장치 추가
         if os.path.exists(path):
             state = torch.load(path, map_location=self.device)
             model.load_state_dict(state)
