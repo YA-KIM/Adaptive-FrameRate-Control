@@ -160,6 +160,7 @@ class Agent:
         return float(inter_area / denom)
 
     @staticmethod
+    #여기서 말하는 moment는 자료(moment)가 아닌 한 순간의 vector를 의미; 초기 코딩과정 이슈...
     def _angle_of(moment: np.ndarray) -> float:
         """rad; moment shape (1, >=7), vx=[:,4], vy=[:,5]"""
         vx, vy = float(moment[0, 4]), float(moment[0, 5])
