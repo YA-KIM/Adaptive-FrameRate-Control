@@ -9,7 +9,7 @@ from utility.model import *
 from utility.tools import *
 from utility.agent_MOT import Agent
 from utility.moment import *
-from yolov7_object_tracking.DnT_ranking import * # Changable
+from yolov7_object_tracking.DnT_ranking import * # Changable SORT Tracker 모듈 호출하는 코드
 import random
 from dataclasses import dataclass
 from typing import List, Optional
