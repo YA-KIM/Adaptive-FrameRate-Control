@@ -441,7 +441,7 @@ class SOT_with_DRL_Test:
 
                     # --- 4) 추적 업데이트 ---
                     ds_tracker.predict()
-                    ds_tracker.update(detections)
+                    ds_tracker.update(detections,frame_rate=self.currentFr)
 
                     identities, boxes = [], []
                     velocities, accelerations, ang_vels = [], [], []
