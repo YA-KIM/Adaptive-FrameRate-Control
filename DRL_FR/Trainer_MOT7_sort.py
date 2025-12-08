@@ -421,7 +421,7 @@ class SOT_with_DRL_Tr():
                             gt = dets_to_sort[i][0:4].reshape(1, 4)
                             dets_to_sort[i][0:4] = gt.flatten()
 
-                            kalman_predict = sort_tracker.update(dets_to_sort[i].reshape(1, -1))  # (1, 6) shape으로 reshape
+                            kalman_predict = sort_tracker.update(dets_to_sort[i].reshape(1, -1), frame_rate = self.currentFr,)  # (1, 6) shape으로 reshape
 
                             kalman_states = sort_tracker.getTrackers()
 
@@ -511,7 +511,7 @@ class SOT_with_DRL_Tr():
                                             
                             if best_target is not None:
                                 best_target = best_target.reshape(1, -1)
-                                kalman_predict = sort_tracker.update(best_target)
+                                kalman_predict = sort_tracker.update(best_target,  frame_rate = self.currentFr, )
                                 kalman_states = sort_tracker.getTrackers()
                                 #check if predict BB is still inside of frame
                                 cx, cy, h, w = kalman_predict[0][:4]
