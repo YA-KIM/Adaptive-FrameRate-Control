@@ -505,7 +505,7 @@ class SOT_with_DRL_Tr:
                             gt = dets_first[i][0:4].reshape(1, 4)
                             dets_first[i][0:4] = gt.flatten()
 
-                            kalman_predict = sort_tracker.update(dets_first[i].reshape(1, -1))
+                            kalman_predict = sort_tracker.update(dets_first[i].reshape(1, -1),frame_rate=self.currentFr)
                             kalman_states = sort_tracker.getTrackers()
 
                             if len(kalman_states) > 0:
@@ -599,7 +599,7 @@ class SOT_with_DRL_Tr:
 
                             if best_target is not None:
                                 best_target = best_target.reshape(1, -1)
-                                kalman_predict = sort_tracker.update(best_target)
+                                kalman_predict = sort_tracker.update(best_target,frame_rate=self.currentFr)
                                 kalman_states = sort_tracker.getTrackers()
 
                                 cx, cy, h, w = kalman_predict[0][:4]
