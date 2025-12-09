@@ -176,11 +176,12 @@ class Agent:
         t_prev = {30: 1, 15: 2, 10: 3, 5: 6}.get(int(prev_fr), 1) #dw/dt,dh/dt 계산용
 
         cx, cy, h, w, vx, vy = [float(x) for x in cur[0, 0:6]]
+        h_prev, w_prev = [float(x) for x in prev[0, 2:4]]
 
         # prev 없으면 0 벡터 취급
         prev = prev if prev is not None else np.zeros((1, 9), dtype=np.float32)
-        dh = float(cur[0, 2] - prev[0, 2])/t_prev if t_prev !=0 else 0.0
-        dw = float(cur[0, 3] - prev[0, 3])/t_prev if t_prev !=0 else 0.0
+        dh = (h-h_prev)/t_prev if t_prev !=0 else 0.0
+        dw = (w-w_prev)/t_prev if t_prev !=0 else 0.0
 
         new_cx = cx + vx * t
         new_cy = cy + vy * t
