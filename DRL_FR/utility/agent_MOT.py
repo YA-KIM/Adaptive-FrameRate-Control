@@ -161,25 +161,27 @@ class Agent:
 
     @staticmethod
     #여기서 말하는 moment는 자료(moment)가 아닌 한 순간의 vector를 의미; 초기 코딩과정 이슈...
+    # === tools for caclulating reward ===
     def _angle_of(moment: np.ndarray) -> float:
         """rad; moment shape (1, >=7), vx=[:,4], vy=[:,5]"""
         vx, vy = float(moment[0, 4]), float(moment[0, 5])
         return float(np.arctan2(vy, vx))
 
-    def _predict_bbox_cxcyhw(self, prev: np.ndarray, cur: np.ndarray, fr: int) -> np.ndarray:
+    def _predict_bbox_cxcyhw(self, prev: np.ndarray, cur: np.ndarray, cur_fr: int, prev_fr: int) -> np.ndarray:
         """
         현재 moment(cur)와 prev 차이를 이용한 1-step ahead 예측.
         입력/출력: (1,9)에서 [:4]=[cx,cy,h,w].
         """
-        t = {30: 1, 15: 2, 10: 3, 5: 6}.get(int(fr), 1)
+        t = {30: 1, 15: 2, 10: 3, 5: 6}.get(int(cur_fr), 1) #data set이 24프레임이라 30Fr을 1index skip이라고 가정가능 
+        t_prev = {30: 1, 15: 2, 10: 3, 5: 6}.get(int(prev_fr), 1) #dw/dt,dh/dt 계산용
 
         cx, cy, h, w = [float(x) for x in cur[0, 0:4]]
         vx, vy = float(cur[0, 4]), float(cur[0, 5])
 
         # prev 없으면 0 벡터 취급
         prev = prev if prev is not None else np.zeros((1, 9), dtype=np.float32)
-        dh = float(cur[0, 2] - prev[0, 2])
-        dw = float(cur[0, 3] - prev[0, 3])
+        dh = float(cur[0, 2] - prev[0, 2])/t_prev if t_prev !=0 else 0.0
+        dw = float(cur[0, 3] - prev[0, 3])/t_prev if t_prev !=0 else 0.0
 
         new_cx = cx + vx * t
         new_cy = cy + vy * t
@@ -215,7 +217,7 @@ class Agent:
         """
         # 1) IoU
         # 예측 bbox (cx,cy,h,w) -> xyxy 변환
-        pred_cxcyhw = self._predict_bbox_cxcyhw(prev_moment, moment, expected_FR)[0]
+        pred_cxcyhw = self._predict_bbox_cxcyhw(prev_moment, moment, expected_FR, prev_Fr)[0]
         post_cxcyhw = post_moment[0, 0:4]
 
         pred_xyxy = self._to_xyxy_from_cxcyhw(pred_cxcyhw)
