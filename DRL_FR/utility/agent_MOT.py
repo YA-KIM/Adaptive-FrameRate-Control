@@ -175,8 +175,7 @@ class Agent:
         t = {30: 1, 15: 2, 10: 3, 5: 6}.get(int(cur_fr), 1) #data set이 24프레임이라 30Fr을 1index skip이라고 가정가능 
         t_prev = {30: 1, 15: 2, 10: 3, 5: 6}.get(int(prev_fr), 1) #dw/dt,dh/dt 계산용
 
-        cx, cy, h, w = [float(x) for x in cur[0, 0:4]]
-        vx, vy = float(cur[0, 4]), float(cur[0, 5])
+        cx, cy, h, w, vx, vy = [float(x) for x in cur[0, 0:6]]
 
         # prev 없으면 0 벡터 취급
         prev = prev if prev is not None else np.zeros((1, 9), dtype=np.float32)
